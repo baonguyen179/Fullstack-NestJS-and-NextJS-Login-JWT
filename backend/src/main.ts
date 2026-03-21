@@ -16,6 +16,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true, //nếu thêm thuộc tính không tồn tại vào thì báo
+      transform: true,
     }),
   );
   // Đặt tiền tố API (ví dụ: localhost:8080/api)

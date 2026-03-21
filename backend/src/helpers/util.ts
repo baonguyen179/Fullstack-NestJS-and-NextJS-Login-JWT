@@ -12,7 +12,7 @@ const hashPassword = async (plainPassword: string) => {
 const checkPassword = async (
   plainPassword: string,
   hashPasswordInDB: string,
-) => {
+): Promise<boolean> => {
   const isMatch = await bcrypt.compare(plainPassword, hashPasswordInDB);
   return isMatch; // Trả về true nếu đúng, false nếu sai
 };

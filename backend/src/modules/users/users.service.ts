@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,6 +10,7 @@ import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
 import { hashPassword } from '@/helpers/util';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class UsersService {
@@ -59,15 +64,37 @@ export class UsersService {
     return { totalPages, totalItems, results };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    // 1. Kiểm tra định dạng ID
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('Id không đúng định dạng mongoose.');
+    }
+
+    // 2. Tìm kiếm User
+    const user = await this.userModel.findById(id).select('-password');
+
+    // 3. Kiểm tra nếu không tìm thấy User trong DB
+    if (!user) {
+      throw new NotFoundException(`Không tìm thấy người dùng với id: ${id}`);
+    }
+
+    return user;
+  }
+  findByEmail(email: string) {
+    const user = this.userModel.findOne({ email });
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(updateUserDto: UpdateUserDto) {
+    return await this.userModel.updateOne(
+      { _id: updateUserDto._id },
+      { ...updateUserDto },
+    );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string) {
+    if (mongoose.isValidObjectId(id))
+      return await this.userModel.deleteOne({ _id: id });
+    else throw new BadRequestException('Id không đúng định dạng mongoose.');
   }
 }
