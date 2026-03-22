@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '@/modules/users/users.service';
 import { checkPassword } from '@/helpers/util';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '@/modules/users/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -9,13 +10,10 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) {}
-
-  async signIn(email: string, pass: string): Promise<any> {
+  async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.usersService.findByEmail(email);
     if (!user) {
-      throw new UnauthorizedException(
-        'Tài khoản hoặc mật khẩu không chính xác',
-      );
+      return null;
     }
     const isPasswordValid = await checkPassword(pass, user.password);
     if (!isPasswordValid) {
@@ -23,9 +21,12 @@ export class AuthService {
         'Tài khoản hoặc mật khẩu không chính xác',
       );
     }
-    const payload = { sub: user._id.toString(), username: user.email };
+    return user;
+  }
+  login(user: any) {
+    const payload = { username: user.email, sub: user._id };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: this.jwtService.sign(payload),
     };
   }
 }

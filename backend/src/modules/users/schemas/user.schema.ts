@@ -8,7 +8,7 @@ export class User {
   @Prop()
   name: string;
 
-  @Prop()
+  @Prop({ unique: true, required: true })
   email: string;
 
   @Prop()
@@ -29,7 +29,7 @@ export class User {
   @Prop()
   accountType: string;
 
-  @Prop()
+  @Prop({ default: false })
   isActive: string;
 
   @Prop()
