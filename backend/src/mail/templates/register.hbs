@@ -21,7 +21,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background-color: #4F46E5; /* Màu chủ đạo, bạn có thể đổi */
+            background-color: #4F46E5; /* Màu chủ đạo */
             color: #ffffff;
             padding: 30px 20px;
             text-align: center;
@@ -34,21 +34,20 @@
             padding: 30px 20px;
             line-height: 1.6;
         }
-        .button-container {
+        .otp-container {
             text-align: center;
             margin: 30px 0;
         }
-        .button {
-            background-color: #4F46E5;
-            color: #ffffff;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
+        .otp-code {
             display: inline-block;
-        }
-        .button:hover {
-            background-color: #4338CA;
+            background-color: #f3f4f6;
+            border: 2px dashed #4F46E5;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #4F46E5;
+            letter-spacing: 8px; /* Tạo khoảng cách giữa các số */
         }
         .footer {
             background-color: #f9fafb;
@@ -58,31 +57,25 @@
             color: #6b7280;
             border-top: 1px solid #e5e7eb;
         }
-        .fallback-link {
-            font-size: 14px;
-            color: #4F46E5;
-            word-break: break-all;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Chào mừng bạn đến với hệ thống!</h1>
+            <h1>Xác nhận đăng ký tài khoản mới!</h1>
         </div>
         
         <div class="content">
             <p>Chào <strong>{{name}}</strong>,</p>
-            <p>Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất quá trình đăng ký và bảo mật tài khoản của bạn, vui lòng xác nhận địa chỉ email bằng cách nhấn vào nút bên dưới:</p>
+            <p>Cảm ơn bạn đã đăng ký tài khoản. Để hoàn tất quá trình đăng ký, vui lòng sử dụng mã xác thực (OTP) dưới đây:</p>
             
-            <div class="button-container">
-                <a href="{{url}}" class="button">Xác nhận Email</a>
+            <div class="otp-container">
+                <div class="otp-code">{{otp}}</div>
             </div>
             
-            <p>Nếu nút bấm không hoạt động, bạn có thể copy và dán đường dẫn sau vào trình duyệt:</p>
-            <p><a href="{{url}}" class="fallback-link">{{url}}</a></p>
-            
-            <p>Liên kết này sẽ hết hạn sau <strong>24 giờ</strong>.</p>
+            <p>Mã xác thực này sẽ hết hạn sau <strong>5 phút</strong>.</p>
+            <p><em>Lưu ý: Vui lòng không chia sẻ mã này với bất kỳ ai để đảm bảo an toàn cho tài khoản của bạn.</em></p>
+            <br>
             <p>Trân trọng,<br>Đội ngũ hỗ trợ</p>
         </div>
         

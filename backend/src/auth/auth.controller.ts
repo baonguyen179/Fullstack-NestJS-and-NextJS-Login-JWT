@@ -44,11 +44,15 @@ export class AuthController {
   @Get('email')
   @Public()
   testMail() {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
     this.mailerService.sendMail({
       to: 'baohp17@gmail.com',
-      subject: 'Welcome!',
-      text: 'welcome',
-      html: '<b>Hello world</b>',
+      subject: 'Xác nhận đăng ký tài khoản mới',
+      template: 'register',
+      context: {
+        name: 'userName',
+        otp: '123456',
+      },
     });
     return 'ok';
   }

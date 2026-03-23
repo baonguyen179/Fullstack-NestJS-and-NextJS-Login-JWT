@@ -60,7 +60,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
           from: config.get<string>('MAIL_FROM'),
         },
         template: {
-          dir: __dirname + '/templates',
+          dir: process.cwd() + '/src/mail/templates/',
           adapter: new HandlebarsAdapter(),
           options: { strict: true },
         },
