@@ -3,6 +3,7 @@ import { UsersService } from '@/modules/users/users.service';
 import { checkPassword } from '@/helpers/util';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@/modules/users/schemas/user.schema';
+import { CreateAuthDto } from './dto/create-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,9 +25,13 @@ export class AuthService {
     return user;
   }
   login(user: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const payload = { username: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
+  handleRegister = async (register: CreateAuthDto) => {
+    return await this.usersService.handleRegister(register);
+  };
 }

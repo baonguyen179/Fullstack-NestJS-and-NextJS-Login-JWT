@@ -11,6 +11,8 @@ import { User } from './schemas/user.schema';
 import { hashPassword } from '@/helpers/util';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class UsersService {
@@ -96,5 +98,27 @@ export class UsersService {
     if (mongoose.isValidObjectId(id))
       return await this.userModel.deleteOne({ _id: id });
     else throw new BadRequestException('Id không đúng định dạng mongoose.');
+  }
+  async handleRegister(createUserDto: CreateAuthDto) {
+    const { name, email, password } = createUserDto;
+    const isExist = await this.isEmailExist(email);
+    if (isExist) {
+      throw new BadRequestException(
+        `Email is exist: ${email}. Vui lòng dùng email khác.`,
+      );
+    }
+    const hashPass = await hashPassword(password);
+    const expiredAt = dayjs().add(1, 'day').toDate();
+    const { v4: uuidv4 } = await import('uuid');
+    const user = await this.userModel.create({
+      name,
+      email,
+      password: hashPass,
+      codeId: uuidv4(),
+      codeExpired: expiredAt,
+    });
+    return {
+      _id: user._id,
+    };
   }
 }
