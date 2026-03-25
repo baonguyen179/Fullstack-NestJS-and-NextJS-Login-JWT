@@ -3,9 +3,17 @@ import { Button, Col, Divider, Form, Input, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
-const Login = () => {
+import { useSearchParams } from 'next/navigation';
+import { authenticate } from '@/actions/actions';
 
+const Login = () => {
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get('callbackUrl') || '/';
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const onFinish = async (values: any) => {
+        const { email, password } = values;
+        const res = await authenticate(email, password, callbackUrl)
+        console.log('check res: ', res);
 
     };
 
