@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '@/modules/users/users.service';
 import { checkPassword } from '@/helpers/util';
@@ -25,10 +27,15 @@ export class AuthService {
     return user;
   }
   login(user: any) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const payload = { username: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
+      user: {
+        email: user.email,
+        _id: user._id,
+        name: user.name,
+        isActive: user.isActive,
+      },
     };
   }
   handleRegister = async (register: CreateAuthDto) => {

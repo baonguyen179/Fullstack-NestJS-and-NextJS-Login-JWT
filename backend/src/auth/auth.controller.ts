@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
 // import { CreateAuthDto } from './dto/create-auth.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
-import { Public } from '@/decorator/customize';
+import { Public, ResponseMessage } from '@/decorator/customize';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -26,6 +26,7 @@ export class AuthController {
   @Post('login')
   @Public()
   @UseGuards(AuthGuard('local'))
+  @ResponseMessage('Fetch login')
   handleLogin(@Request() req) {
     return this.authService.login(req.user);
   }
