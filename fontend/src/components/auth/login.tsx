@@ -1,24 +1,40 @@
 'use client'
-import { Button, Col, Divider, Form, Input, Row } from 'antd';
+import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
 import { useSearchParams } from 'next/navigation';
 import { authenticate } from '@/actions/actions';
+import { useRouter } from 'next/navigation'
 
 const Login = () => {
+    const [api, contextHolder] = notification.useNotification();
+    const router = useRouter()
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get('callbackUrl') || '/';
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const onFinish = async (values: any) => {
         const { email, password } = values;
-        const res = await authenticate(email, password, callbackUrl)
-        console.log('check res: ', res);
+        const res = await authenticate(email, password)
+
+        if (res?.error) {
+            api.error({
+                title: 'Đăng nhập thất bại',
+                description: res?.message,
+            });
+            if (res?.code === 3) {
+                router.push('/verify')
+            }
+        } else {
+            router.push('/dashboard');
+            router.refresh();
+        }
 
     };
 
     return (
         <Row justify={"center"} style={{ marginTop: "30px" }}>
+            {contextHolder}
             <Col xs={24} md={16} lg={8}>
                 <fieldset style={{
                     padding: "15px",

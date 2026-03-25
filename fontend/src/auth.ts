@@ -1,6 +1,6 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { EmailNotVerifiedError, InvalidEmailPasswordError } from "./utils/errors"
+import { EmailNotVerifiedError, InvalidEmailPasswordError } from "@/utils/errors"
 import { sendRequest } from "@/utils/api"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -20,7 +20,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                         password: credentials.password
                     }
                 })
-                console.log("check res: ", res);
+                // console.log("check res: ", res);
 
                 if (res.statusCode === 201 || res.statusCode === 200) {
 
@@ -60,6 +60,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             (session.user as IUser) = token.user;
             return session;
         },
+
     },
     pages: {
         signIn: "/auth/login",

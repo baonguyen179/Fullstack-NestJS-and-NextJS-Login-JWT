@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import "./globals.css";
+import NextAuthWrapper from "@/library/next.auth.wrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-       <AntdRegistry>{children}</AntdRegistry>
+
+        <AntdRegistry><NextAuthWrapper>{children}</NextAuthWrapper></AntdRegistry>
+
       </body>
     </html>
   );

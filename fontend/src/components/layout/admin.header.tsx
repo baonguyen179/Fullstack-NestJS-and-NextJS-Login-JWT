@@ -6,8 +6,11 @@ import { useContext } from 'react';
 import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
-
-const AdminHeader = () => {
+interface IProps {
+    user: IUser | null | undefined; // Dùng chính interface bạn vừa tạo
+}
+const AdminHeader = (props: IProps) => {
+    const { user } = props;
     const { Header } = Layout;
     const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
 
@@ -72,7 +75,7 @@ const AdminHeader = () => {
                         style={{ color: "unset", lineHeight: "0 !important", marginRight: 20 }}
                     >
                         <Space>
-                            Welcome Admin
+                            WELCOME{user?.name}
                             <DownOutlined />
                         </Space>
                     </a>

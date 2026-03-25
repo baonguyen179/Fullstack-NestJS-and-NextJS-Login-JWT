@@ -3,28 +3,36 @@
 import { signIn } from '@/auth';
 import { AuthError } from "@auth/core/errors";
 
-export async function authenticate(email: string, password: string, callbackUrl: string) {
+
+export async function authenticate(email: string, password: string) {
     try {
-        const data = await signIn("credentials", {
+        await signIn("credentials", {
             email,
             password,
-            // callbackUrl:callbackUrl,
-            redirect: false
+            redirect: false,
         });
-        console.log("check data: ", data);
 
     } catch (error) {
+        // 1. Nếu là lỗi do NextAuth ném ra (sai pass, chưa active...)
         if (error instanceof AuthError) {
-            // Kiểm tra cái 'type' chúng ta đã định nghĩa ở errors.ts
-            switch (error.type as string) {
-                case "InvalidEmailPasswordError":
-                    return { success: false, message: "Email hoặc mật khẩu không đúng!", code: 1 };
-                case "CredentialsSignin":
-                    return { success: false, message: "Đăng nhập thất bại.", code: 2 };
+
+            // Lấy ra cái thông báo lỗi mà bạn đã ném ở hàm authorize
+            const customError = error.cause?.err;
+
+            // Kiểm tra xem có phải lỗi chưa verify email không
+            if (customError?.name === 'EmailNotVerifiedError') {
+                return { error: true, code: 3, message: "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email." };
+            }
+
+            // Các lỗi mặc định khác của NextAuth
+            switch (error.type) {
+                case 'CredentialsSignin':
+                    return { error: true, message: 'Email hoặc mật khẩu không chính xác.' };
                 default:
-                    return { success: false, message: "Lỗi hệ thống: " + error.type, code: 3 };
+                    return { error: true, message: 'Đã có lỗi xảy ra từ máy chủ.' };
             }
         }
-        throw error;
+
+        return { error: true, message: 'Đã có lỗi hệ thống không xác định xảy ra.' };
     }
 }
