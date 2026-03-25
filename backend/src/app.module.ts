@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from '@/app.controller';
 import { AppService } from '@/app.service';
 import { UsersModule } from '@/modules/users/users.module';
@@ -18,7 +18,8 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { TransformInterceptor } from './core/transform.interceptor';
+import { TransformInterceptor } from '@/core/transform.interceptor';
+import { LoggerMiddleware } from '@/core/logger.middleware';
 
 @Module({
   imports: [
@@ -81,4 +82,9 @@ import { TransformInterceptor } from './core/transform.interceptor';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  // Cấu hình Middleware ở đây
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*'); // Dấu '*' nghĩa là áp dụng cho MỌI route (mọi API)
+  }
+}
