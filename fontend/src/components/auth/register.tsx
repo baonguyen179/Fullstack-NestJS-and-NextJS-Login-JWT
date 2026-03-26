@@ -1,13 +1,35 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import React from 'react';
-import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
+import { App, Button, Col, Divider, Form, Input, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
+import { sendRequest } from '@/utils/api';
+import { useRouter } from 'next/navigation';
 
 const Register = () => {
+    const { notification } = App.useApp();
+    const router = useRouter()
 
     const onFinish = async (values: any) => {
-
+        const { email, password, name } = values;
+        const res = await sendRequest<IBackendRes<any>>({
+            method: 'POST',
+            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/register`,
+            body: {
+                email: email,
+                password: password,
+                name: name,
+            }
+        })
+        console.log('check res register.tsx: ', res);
+        if (res?.data) {
+            router.push(`/verify/${res.data?._id}`)
+        } else {
+            notification.error({
+                title: 'Register error!',
+                description: res?.message,
+            });
+        }
     };
 
     return (
@@ -31,6 +53,10 @@ const Register = () => {
                             name="email"
                             rules={[
                                 {
+                                    type: 'email',
+                                    message: 'The input is not valid E-mail!',
+                                },
+                                {
                                     required: true,
                                     message: 'Please input your email!',
                                 },
@@ -51,7 +77,28 @@ const Register = () => {
                         >
                             <Input.Password />
                         </Form.Item>
-
+                        <Form.Item
+                            name="confirm"
+                            label="Confirm Password"
+                            dependencies={['password']}
+                            hasFeedback
+                            rules={[
+                                {
+                                    required: true,
+                                    message: 'Please confirm your password!',
+                                },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        if (!value || getFieldValue('password') === value) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('The password that you entered do not match!'));
+                                    },
+                                }),
+                            ]}
+                        >
+                            <Input.Password />
+                        </Form.Item>
                         <Form.Item
                             label="Name"
                             name="name"

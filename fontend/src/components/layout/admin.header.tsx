@@ -1,11 +1,12 @@
 'use client'
 import { AdminContext } from '@/library/admin.context';
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import { MenuFoldOutlined, MenuUnfoldOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
 import { useContext } from 'react';
-import { DownOutlined, SmileOutlined } from '@ant-design/icons';
+import { DownOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
+import { signOut } from "next-auth/react"
 interface IProps {
     user: IUser | null | undefined; // Dùng chính interface bạn vừa tạo
 }
@@ -17,35 +18,15 @@ const AdminHeader = (props: IProps) => {
     const items: MenuProps['items'] = [
         {
             key: '1',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-                    1st menu item
-                </a>
-            ),
-        },
-        {
-            key: '2',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.aliyun.com">
-                    2nd menu item (disabled)
-                </a>
-            ),
-            icon: <SmileOutlined />,
-            disabled: true,
-        },
-        {
-            key: '3',
-            label: (
-                <a target="_blank" rel="noopener noreferrer" href="https://www.luohanacademy.com">
-                    3rd menu item (disabled)
-                </a>
-            ),
-            disabled: true,
+            label: <span>Settings</span>,
+            icon: <SettingOutlined />
         },
         {
             key: '4',
             danger: true,
-            label: 'a danger item',
+            label: <span>Đăng xuất</span>,
+            onClick: () => signOut({ callbackUrl: "/auth/login" }),
+            icon: <LogoutOutlined />,
         },
     ];
 

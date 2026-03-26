@@ -1,5 +1,5 @@
 'use client'
-import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
+import { Button, Col, Divider, Form, Input, App, Row } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
@@ -8,7 +8,7 @@ import { authenticate } from '@/actions/actions';
 import { useRouter } from 'next/navigation'
 
 const Login = () => {
-    const [api, contextHolder] = notification.useNotification();
+    const { notification } = App.useApp();
     const router = useRouter()
     const searchParams = useSearchParams();
     const callbackUrl = searchParams.get('callbackUrl') || '/';
@@ -16,9 +16,10 @@ const Login = () => {
     const onFinish = async (values: any) => {
         const { email, password } = values;
         const res = await authenticate(email, password)
+        // console.log('check res login.tsx: ', res);
 
         if (res?.error) {
-            api.error({
+            notification.error({
                 title: 'Đăng nhập thất bại',
                 description: res?.message,
             });
@@ -34,7 +35,6 @@ const Login = () => {
 
     return (
         <Row justify={"center"} style={{ marginTop: "30px" }}>
-            {contextHolder}
             <Col xs={24} md={16} lg={8}>
                 <fieldset style={{
                     padding: "15px",
@@ -53,6 +53,10 @@ const Login = () => {
                             label="Email"
                             name="email"
                             rules={[
+                                {
+                                    type: 'email',
+                                    message: 'The input is not valid E-mail!',
+                                },
                                 {
                                     required: true,
                                     message: 'Please input your email!',

@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
 import { signIn } from '@/auth';
 import { AuthError } from "@auth/core/errors";
-
 
 export async function authenticate(email: string, password: string) {
     try {
@@ -12,27 +12,33 @@ export async function authenticate(email: string, password: string) {
             redirect: false,
         });
 
-    } catch (error) {
-        // 1. Nếu là lỗi do NextAuth ném ra (sai pass, chưa active...)
+    } catch (error: any) {
+
+
         if (error instanceof AuthError) {
-
-            // Lấy ra cái thông báo lỗi mà bạn đã ném ở hàm authorize
-            const customError = error.cause?.err;
-
-            // Kiểm tra xem có phải lỗi chưa verify email không
-            if (customError?.name === 'EmailNotVerifiedError') {
-                return { error: true, code: 3, message: "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email." };
+            console.log('check error action.ts: ', error);
+            // 1. Kiểm tra chính xác cái chuỗi type mà NextAuth trả về
+            if ((error.type as string) === 'Tài khoản chưa kịch hoạt!') {
+                return {
+                    error: true,
+                    code: 3,
+                    message: "Tài khoản chưa được kích hoạt, vui lòng kiểm tra email để xác thực."
+                };
             }
 
-            // Các lỗi mặc định khác của NextAuth
-            switch (error.type) {
-                case 'CredentialsSignin':
-                    return { error: true, message: 'Email hoặc mật khẩu không chính xác.' };
-                default:
-                    return { error: true, message: 'Đã có lỗi xảy ra từ máy chủ.' };
+            // 2. Nếu là lỗi sai email/mật khẩu
+            if ((error.type as string) === 'Email/Password không hợp lệ!') {
+                return {
+                    error: true,
+                    message: "Email hoặc mật khẩu không chính xác."
+                };
             }
+
+            // 3. Các lỗi linh tinh khác
+            return { error: true, message: 'Đã có lỗi xảy ra từ máy chủ.' };
         }
 
+        // Bỏ qua throw error, trả về lỗi chung chung
         return { error: true, message: 'Đã có lỗi hệ thống không xác định xảy ra.' };
     }
 }

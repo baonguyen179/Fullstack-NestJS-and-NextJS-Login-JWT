@@ -1,29 +1,32 @@
 import { auth } from "@/auth"
 
-// 1. Khai báo danh sách các route không cần bảo vệ (Public Routes)
-const publicRoutes = ["/auth/login", "/auth/register", "/verify", "/"];
+//  các route cố định (Exact Match)
+const publicRoutes = ["/auth/login", "/auth/register", "/"];
 
 export default auth((req) => {
     const { pathname } = req.nextUrl;
     const isLoggedIn = !!req.auth;
 
-    // 2. Nếu đường dẫn người dùng đang vào nằm trong danh sách Public -> Cho qua luôn
-    if (publicRoutes.includes(pathname)) {
-        // Tùy chọn nâng cao: Nếu đã login rồi mà cố vào lại trang /auth/login -> Đá về Admin
+    //  biến kiểm tra tổng hợp
+    const isPublicRoute =
+        publicRoutes.includes(pathname) || // Khớp chính xác các route cố định
+        pathname.startsWith("/verify/");   // Khớp mọi route bắt đầu bằng /verify/ (như /verify/123, /verify/abc)
+
+    if (isPublicRoute) {
+        //  Đã login thì không cho vào trang auth nữa
         if (isLoggedIn && pathname.startsWith("/auth/")) {
-            return Response.redirect(new URL("/admin/dashboard", req.nextUrl.origin));
+            return Response.redirect(new URL("/dashboard", req.nextUrl.origin));
         }
 
-        return; // Lệnh return không trả về gì nghĩa là "Cho đi tiếp, không cản nữa"
+        return;
     }
 
-    // 3. Nếu không phải Public Route (tức là Private), mà chưa login -> Đuổi ra Login
+    // 4. Nếu không phải Public Route mà chưa login -> Đuổi ra Login
     if (!isLoggedIn) {
         return Response.redirect(new URL("/auth/login", req.nextUrl.origin));
     }
 })
 
-// Vẫn giữ config này để né các file tĩnh (CSS, JS, Hình ảnh) giúp web chạy nhanh
 export const config = {
     matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
