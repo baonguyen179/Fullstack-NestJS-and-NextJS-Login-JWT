@@ -11,7 +11,7 @@ import { User } from './schemas/user.schema';
 import { hashPassword } from '@/helpers/util';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
-import { CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import { CheckCodeDto, CreateAuthDto } from '@/auth/dto/create-auth.dto';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -135,5 +135,28 @@ export class UsersService {
     return {
       _id: user._id,
     };
+  }
+  async handleCheckCode(checkcodeDto: CheckCodeDto) {
+    const user = await this.userModel.findOne({
+      _id: checkcodeDto._id,
+      codeId: checkcodeDto.codeId,
+    });
+    if (!user) {
+      throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn!');
+    }
+    const isBeforeCheck = dayjs().isBefore(dayjs(user.codeExpired));
+    if (isBeforeCheck) {
+      await this.userModel.updateOne(
+        { _id: checkcodeDto._id },
+        {
+          isActive: true,
+          codeId: null, // Tiêu hủy mã code để chống dùng lại
+          codeExpired: null,
+        },
+      );
+      return { isBeforeCheck };
+    } else {
+      throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn!');
+    }
   }
 }

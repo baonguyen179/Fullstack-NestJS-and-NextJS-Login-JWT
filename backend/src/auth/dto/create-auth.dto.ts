@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmail, IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class CreateAuthDto {
   @IsNotEmpty()
@@ -8,4 +8,12 @@ export class CreateAuthDto {
   password: string;
   @IsOptional()
   name: string;
+}
+
+export class CheckCodeDto {
+  @IsMongoId()
+  @IsNotEmpty({ message: '_id không phù hợp' })
+  _id: string;
+  @IsNotEmpty()
+  codeId: string;
 }

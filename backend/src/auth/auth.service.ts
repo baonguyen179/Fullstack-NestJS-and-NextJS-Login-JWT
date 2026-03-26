@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '@/modules/users/users.service';
 import { checkPassword } from '@/helpers/util';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@/modules/users/schemas/user.schema';
-import { CreateAuthDto } from './dto/create-auth.dto';
+import { CheckCodeDto, CreateAuthDto } from './dto/create-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +31,10 @@ export class AuthService {
     return user;
   }
   login(user: any) {
+    const activeStatus = String(user.isActive).toLowerCase() === 'true';
+    if (activeStatus === false) {
+      throw new BadRequestException('Tài khoản chưa được kích hoạt');
+    }
     const payload = { username: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -40,5 +48,8 @@ export class AuthService {
   }
   handleRegister = async (register: CreateAuthDto) => {
     return await this.usersService.handleRegister(register);
+  };
+  handleCheckCode = async (checkcodeDto: CheckCodeDto) => {
+    return await this.usersService.handleCheckCode(checkcodeDto);
   };
 }
