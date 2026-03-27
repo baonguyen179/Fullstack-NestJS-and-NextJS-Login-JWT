@@ -1,9 +1,40 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { auth } from "@/auth";
 import UserTable from "@/components/admin/user.table";
+import { sendRequest } from "@/utils/api";
 
-const ManageUserPage = () => {
+
+interface IProps {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+const ManageUserPage = async (props: IProps) => {
+    const searchParams = await props.searchParams;
+    const current = searchParams.current ?? 1;
+    const pageSize = searchParams.pageSize ?? 10;
+    const session = await auth();
+
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`,
+        method: "GET",
+        queryParams: {
+            current,
+            pageSize
+        },
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        nextOption: {
+            next: { tags: ['list-users'] }
+        }
+    })
+
     return (
         <div>
-            <UserTable />
+            <UserTable
+                users={res?.data?.results ?? []}
+                meta={res?.data?.meta}
+            />
         </div>
     )
 }

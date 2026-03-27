@@ -50,7 +50,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
             if (user) { // user này lấy từ kết quả của authorize trên
                 token.user = user as IUser;
-                console.log("token after: ", token);
+                // console.log("token after: ", token);
 
             }
             return token;

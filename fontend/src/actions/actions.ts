@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use server'
 
-import { signIn } from '@/auth';
+import { auth,signIn } from '@/auth';
 import { AuthError } from "@auth/core/errors";
+import { revalidateTag } from 'next/cache'
+import { sendRequest } from "@/utils/api";
 
 export async function authenticate(email: string, password: string) {
     try {
@@ -41,4 +43,46 @@ export async function authenticate(email: string, password: string) {
         // Bỏ qua throw error, trả về lỗi chung chung
         return { error: true, message: 'Đã có lỗi hệ thống không xác định xảy ra.' };
     }
+}
+
+export const handleCreateUserAction = async (data: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`,
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        body: { ...data }
+    })
+    revalidateTag("list-users", "default")
+    return res;
+}
+
+export const handleUpdateUserAction = async (data: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`,
+        method: "PATCH",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        body: { ...data }
+    })
+    revalidateTag("list-users", "default")
+    return res;
+}
+
+export const handleDeleteUserAction = async (id: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/${id}`,
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+    })
+
+    revalidateTag("list-users", "default")
+    return res;
 }
