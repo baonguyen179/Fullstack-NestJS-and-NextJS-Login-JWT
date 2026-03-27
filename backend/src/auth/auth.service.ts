@@ -9,7 +9,12 @@ import { UsersService } from '@/modules/users/users.service';
 import { checkPassword } from '@/helpers/util';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@/modules/users/schemas/user.schema';
-import { CheckCodeDto, CreateAuthDto } from './dto/create-auth.dto';
+import {
+  CheckCodeDto,
+  CreateAuthDto,
+  RetryActiveDto,
+  RetryPasswordDto,
+} from './dto/create-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -51,5 +56,14 @@ export class AuthService {
   };
   handleCheckCode = async (checkcodeDto: CheckCodeDto) => {
     return await this.usersService.handleCheckCode(checkcodeDto);
+  };
+  handleRetryActive = async (data: RetryActiveDto) => {
+    return await this.usersService.handleRetryActive(data);
+  };
+  handleRetryPassword = async (data: RetryActiveDto) => {
+    return await this.usersService.handleRetryPassword(data);
+  };
+  handleChangePassword = async (data: RetryPasswordDto) => {
+    return await this.usersService.handleChangePassword(data);
   };
 }

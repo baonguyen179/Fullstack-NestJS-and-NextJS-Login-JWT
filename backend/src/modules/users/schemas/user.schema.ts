@@ -23,10 +23,10 @@ export class User {
   @Prop()
   image: string;
 
-  @Prop()
+  @Prop({ default: 'USER' })
   role: string;
 
-  @Prop()
+  @Prop({ default: 'LOCAL' })
   accountType: string;
 
   @Prop({ default: false })

@@ -17,3 +17,19 @@ export class CheckCodeDto {
   @IsNotEmpty()
   codeId: string;
 }
+export class RetryActiveDto {
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
+export class RetryPasswordDto {
+  @IsNotEmpty()
+  codeId: string;
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+  @IsNotEmpty()
+  password: string;
+  @IsNotEmpty()
+  confirm: string;
+}

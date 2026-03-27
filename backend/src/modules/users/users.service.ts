@@ -11,7 +11,12 @@ import { User } from './schemas/user.schema';
 import { hashPassword } from '@/helpers/util';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
-import { CheckCodeDto, CreateAuthDto } from '@/auth/dto/create-auth.dto';
+import {
+  CheckCodeDto,
+  CreateAuthDto,
+  RetryActiveDto,
+  RetryPasswordDto,
+} from '@/auth/dto/create-auth.dto';
 import dayjs from 'dayjs';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -110,7 +115,7 @@ export class UsersService {
       );
     }
     const hashPass = await hashPassword(password);
-    const expiredAt = dayjs().add(1, 'day').toDate();
+    const expiredAt = dayjs().add(5, 'minutes').toDate();
 
     const { v4: uuidv4 } = await import('uuid');
     const codeId = uuidv4();
@@ -158,5 +163,111 @@ export class UsersService {
     } else {
       throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn!');
     }
+  }
+  async handleRetryActive(data: RetryActiveDto) {
+    const user = await this.userModel.findOne({
+      email: data.email,
+    });
+    if (!user) {
+      throw new BadRequestException(
+        'Email này chưa được đăng ký trên hệ thống!',
+      );
+    }
+    if (String(user.isActive).toLowerCase() === 'true') {
+      throw new BadRequestException(
+        'Tài khoản này đã được kích hoạt trước đó rồi!',
+      );
+    }
+    const expiredAt = dayjs().add(5, 'minutes').toDate();
+    const { v4: uuidv4 } = await import('uuid');
+    const codeId = uuidv4();
+    await this.userModel.updateOne(
+      { email: data.email },
+      { codeId: codeId, codeExpired: expiredAt },
+    );
+    this.mailerService
+      .sendMail({
+        to: 'baohp17@gmail.com',
+        subject: 'Xác nhận đăng ký tài khoản mới',
+        template: 'register',
+        context: {
+          name: user?.name ?? user.email,
+          otp: codeId,
+        },
+      })
+      .catch((err) => {
+        // Nên có catch để log lỗi nếu server mail bị sập, tránh crash app
+        console.error('Lỗi gửi email: ', err);
+      });
+    return {
+      _id: user._id,
+      message: 'Mã kích hoạt mới đã được gửi vào email của bạn!',
+    };
+  }
+  async handleRetryPassword(data: RetryActiveDto) {
+    const user = await this.userModel.findOne({
+      email: data.email,
+    });
+    if (!user) {
+      throw new BadRequestException(
+        'Email này chưa được đăng ký trên hệ thống!',
+      );
+    }
+    const expiredAt = dayjs().add(5, 'minutes').toDate();
+    const { v4: uuidv4 } = await import('uuid');
+    const codeId = uuidv4();
+    await this.userModel.updateOne(
+      { email: data.email },
+      { codeId: codeId, codeExpired: expiredAt },
+    );
+    this.mailerService
+      .sendMail({
+        to: 'baohp17@gmail.com',
+        subject: 'Xác nhận thay đổi mật khẩu',
+        template: 'register',
+        context: {
+          name: user?.name ?? user.email,
+          otp: codeId,
+        },
+      })
+      .catch((err) => {
+        console.error('Lỗi gửi email: ', err);
+      });
+    return {
+      _id: user._id,
+      message: 'Mã đã được gửi vào email của bạn!',
+    };
+  }
+  async handleChangePassword(data: RetryPasswordDto) {
+    if (data.password !== data.confirm) {
+      throw new BadRequestException('Mật khẩu xác nhận không khớp.');
+    }
+    const user = await this.userModel.findOne({
+      email: data.email,
+    });
+    if (!user) {
+      throw new BadRequestException(
+        'Email này chưa được đăng ký trên hệ thống!',
+      );
+    }
+    if (data.codeId !== user.codeId) {
+      throw new BadRequestException('Mã xác nhận không chính xác!');
+    }
+    const isBeforeCheck = dayjs().isBefore(dayjs(user.codeExpired));
+    if (!isBeforeCheck) {
+      throw new BadRequestException(
+        'Mã xác nhận đã hết hạn, vui lòng yêu cầu mã mới!',
+      );
+    }
+    const newPassWord = await hashPassword(data.password);
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        password: newPassWord,
+        codeId: null, // Tiêu hủy mã để không ai dùng lại được
+        codeExpired: null,
+      },
+    );
+    return { message: 'Đổi mật khẩu thành công!' };
   }
 }

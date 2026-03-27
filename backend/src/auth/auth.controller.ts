@@ -13,7 +13,12 @@ import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from './passport/jwt-auth.guard';
 import { Public, ResponseMessage } from '@/decorator/customize';
-import { CheckCodeDto, CreateAuthDto } from './dto/create-auth.dto';
+import {
+  CheckCodeDto,
+  CreateAuthDto,
+  RetryActiveDto,
+  RetryPasswordDto,
+} from './dto/create-auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller('auth')
@@ -45,6 +50,23 @@ export class AuthController {
   @Public()
   checkcode(@Body() checkcodeDto: CheckCodeDto) {
     return this.authService.handleCheckCode(checkcodeDto);
+  }
+
+  @Post('retry-active')
+  @Public()
+  retryActive(@Body() data: RetryActiveDto) {
+    return this.authService.handleRetryActive(data);
+  }
+
+  @Post('retry-password')
+  @Public()
+  retryPassword(@Body() data: RetryActiveDto) {
+    return this.authService.handleRetryPassword(data);
+  }
+  @Post('change-password')
+  @Public()
+  changePassword(@Body() data: RetryPasswordDto) {
+    return this.authService.handleChangePassword(data);
   }
 
   @Get('email')
