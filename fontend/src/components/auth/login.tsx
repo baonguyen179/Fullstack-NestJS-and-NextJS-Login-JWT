@@ -6,8 +6,14 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { authenticate } from '@/actions/actions';
 import { useRouter } from 'next/navigation'
+import { useState } from 'react';
+import ModalReactive from './modal.reactive';
+import ModalChangePassword from './modal.change.password';
 
 const Login = () => {
+     const [isModalOpen, setIsModalOpen] = useState(false);
+     const [isModalChangeOpen, setIsModalChangeOpen] = useState(false);
+     const [userEmail, setUserEmail] = useState('');
     const { notification } = App.useApp();
     const router = useRouter()
     const searchParams = useSearchParams();
@@ -15,6 +21,7 @@ const Login = () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const onFinish = async (values: any) => {
         const { email, password } = values;
+        setUserEmail('')
         const res = await authenticate(email, password)
         // console.log('check res login.tsx: ', res);
 
@@ -24,7 +31,10 @@ const Login = () => {
                 description: res?.message,
             });
             if (res?.code === 3) {
-                router.push('/verify')
+                // router.push('/verify')
+                setIsModalOpen(true);
+                setUserEmail(email)
+                return;
             }
         } else {
             router.push('/dashboard');
@@ -88,13 +98,30 @@ const Login = () => {
                             </Button>
                         </Form.Item>
                     </Form>
-                    <Link href={"/"}><ArrowLeftOutlined /> Quay lại trang chủ</Link>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Link href={"/"}><ArrowLeftOutlined /> Quay lại trang chủ</Link>
+                        <a 
+                            style={{ cursor: 'pointer', color: '#1677ff' }} 
+                            onClick={(e) => {
+                                e.preventDefault(); // Ngăn chặn reload trang nếu dùng thẻ a
+                                setIsModalChangeOpen(true);
+                            }}
+                        >
+                            Quên mật khẩu?
+                        </a>
+                    </div>
                     <Divider />
                     <div style={{ textAlign: "center" }}>
                         Chưa có tài khoản? <Link href={"/auth/register"}>Đăng ký tại đây</Link>
                     </div>
                 </fieldset>
             </Col>
+            <ModalReactive isModalOpen={isModalOpen}
+            setIsModalOpen={setIsModalOpen}
+            userEmail={userEmail}
+            />
+            <ModalChangePassword isModalOpen={isModalChangeOpen} 
+            setIsModalOpen={setIsModalChangeOpen}/>
         </Row>
     )
 }
